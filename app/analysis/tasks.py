@@ -2,21 +2,36 @@ from celery import shared_task
 from .models import UploadedFile
 import hashlib
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 @shared_task
 def analyze_uploaded_file(file_id):
-    obj = UploadedFile.objects.get(id=file_id)
+    try:
+        obj = UploadedFile.objects.get(id=file_id)
+    except UploadedFile.DoesNotExist:
+        logger.error(f"UploadedFile with id={file_id} does not exist.")
+        return
+
     path = obj.file.path
+    if not os.path.exists(path):
+        logger.error(f"File not found at: {path}")
+        return
 
-    result = {
-        'filename': os.path.basename(path),
-        'size_bytes': os.path.getsize(path),
-        'sha256': hash_file(path),
-    }
+    try:
+        result = {
+            'filename': os.path.basename(path),
+            'size_bytes': os.path.getsize(path),
+            'sha256': hash_file(path),
+        }
 
-    obj.result = result
-    obj.analyzed = True
-    obj.save()
+        obj.result = result
+        obj.analyzed = True
+        obj.save()
+        logger.info(f"Successfully analyzed: {path}")
+    except Exception as e:
+        logger.exception(f"Failed to analyze file {path}: {e}")
 
 def hash_file(path):
     hasher = hashlib.sha256()
