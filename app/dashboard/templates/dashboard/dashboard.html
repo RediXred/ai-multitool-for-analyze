@@ -1,0 +1,22 @@
+<h1>Добро пожаловать, {{ request.user.username }}</h1>
+
+<h2>Файлы</h2>
+<ul>
+  {% for file in files %}
+    <li>{{ file.filename }} — {{ file.uploaded_at }}</li>
+  {% empty %}
+    <li>Нет загруженных файлов.</li>
+  {% endfor %}
+</ul>
+
+<h2>Чаты</h2>
+<!--<ul>
+  {% for chat in chats %}
+    <li>Чат от {{ chat.created_at }} — {{ chat.messages.count }} сообщений</li>
+  {% empty %}
+    <li>Нет чатов.</li>
+  {% endfor %}
+</ul>
+-->
+
+<a href="{% url 'analysis:upload' %}">Загрузить файлы</a>
