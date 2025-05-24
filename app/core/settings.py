@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'analysis',
     'accounts',
     'dashboard',
+    'baseanalyze',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

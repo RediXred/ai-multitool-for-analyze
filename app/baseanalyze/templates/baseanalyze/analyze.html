@@ -1,0 +1,50 @@
+{% block content %}
+<div class="container mt-4">
+    <h2>Базовый анализ файла: {{ file.file.name }}</h2>
+    
+    <ul class="nav nav-tabs mt-4">
+        <li class="nav-item">
+            <a class="nav-link {% if active_tab == 'basic' %}active{% endif %}" 
+               href="{% url 'analyze-file' file.id %}">Базовый анализ</a>
+        </li>
+    </ul>
+    
+    <div class="card mt-4">
+        <div class="card-header">
+            <h4>Основная информация</h4>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                {% for key, value in file_info.items %}
+                    {% if key != 'hashes' %}
+                    <tr>
+                        <th>{{ key|title }}</th>
+                        <td>{{ value }}</td>
+                    </tr>
+                    {% endif %}
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+    
+    <div class="card mt-4">
+        <div class="card-header">
+            <h4>Хэш-суммы</h4>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                {% for algo, hash_value in file_info.hashes.items %}
+                <tr>
+                    <th>{{ algo|upper }}</th>
+                    <td><code>{{ hash_value }}</code></td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">Назад</a>
+    </div>
+</div>
+{% endblock %}
