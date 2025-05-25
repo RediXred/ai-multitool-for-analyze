@@ -20,6 +20,8 @@ class UploadedFile(models.Model):
     uploaded_at = models.DateTimeField(auto_now_add=True)
     analyzed = models.BooleanField(default=False)
     result = models.JSONField(blank=True, null=True)
+    vt_result = models.JSONField(blank=True, null=True)
+    vt_status = models.CharField(max_length=20, default='not_started')
 
     def __str__(self):
         return f"{self.user.username} - {self.file.name}"

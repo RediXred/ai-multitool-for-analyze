@@ -150,10 +150,69 @@
     </div>
     </div>
 
+    <div class="card mt-4">
+        <div class="card-header">
+            <h4>VirusTotal Анализ</h4>
+        </div>
+        <div class="card-body">
+            {% if vt_info.error %}
+                <div class="alert alert-info" role="alert">
+                    {% if vt_info.error == 'Analysis in progress, please check back later.' %}
+                        Анализ выполняется, пожалуйста, обновите страницу позже.
+                        <a href="{% url 'analyze-file' file.id %}" class="btn btn-sm btn-outline-primary mt-2">Обновить</a>
+                    {% else %}
+                        Ошибка VirusTotal: {{ vt_info.error }}
+                        {% if vt_info.error == 'Analysis timeout' %}
+                            <br>Попробуйте снова позже, анализ может занять больше времени.
+                        {% endif %}
+                        {% if vt_info.details %}
+                            <br>Детали: {{ vt_info.details }}
+                        {% endif %}
+                    {% endif %}
+                </div>
+            {% elif vt_info.detections %}
+                <div class="alert alert-warning" role="alert">
+                    <h5>Обнаружены угрозы!</h5>
+                    <p><strong>Дата сканирования:</strong> {{ vt_info.scan_date|default:"Неизвестно" }}</p>
+                    <p><strong>Статус:</strong> {{ vt_info.status|title }}</p>
+                    <p><strong>Статистика:</strong></p>
+                    <ul>
+                        <li>Вредоносные: {{ vt_info.stats.malicious|default:0 }}</li>
+                        <li>Подозрительные: {{ vt_info.stats.suspicious|default:0 }}</li>
+                        <li>Безопасные: {{ vt_info.stats.harmless|default:0 }}</li>
+                        <li>Необнаружено: {{ vt_info.stats.undetected|default:0 }}</li>
+                    </ul>
+                    <h6>Обнаружения:</h6>
+                    <ul class="list-group list-group-flush">
+                        {% for detection in vt_info.detections %}
+                            {% if detection.category == 'malicious' or detection.category == 'suspicious' %}
+                                <li class="list-group-item">
+                                    <strong>{{ detection.engine }}</strong> (версия: {{ detection.version|default:"Неизвестно" }}):
+                                    {{ detection.result|title }} ({{ detection.category|title }})
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                    <a href="{{ vt_info.permalink }}" class="btn btn-sm btn-outline-primary mt-2" target="_blank">Полный отчет VirusTotal</a>
+                </div>
+            {% else %}
+                <div class="alert alert-success" role="alert">
+                    <h5>OK — Угрозы не обнаружены</h5>
+                    <p><strong>Дата сканирования:</strong> {{ vt_info.scan_date|default:"Неизвестно" }}</p>
+                    <p><strong>Статус:</strong> {{ vt_info.status|title }}</p>
+                    <p><strong>Статистика:</strong></p>
+                    <ul>
+                        <li>Вредоносные: {{ vt_info.stats.malicious|default:0 }}</li>
+                        <li>Подозрительные: {{ vt_info.stats.suspicious|default:0 }}</li>
+                        <li>Безопасные: {{ vt_info.stats.harmless|default:0 }}</li>
+                        <li>Необнаружено: {{ vt_info.stats.undetected|default:0 }}</li>
+                    </ul>
+                    <a href="{{ vt_info.permalink }}" class="btn btn-sm btn-outline-primary mt-2" target="_blank">Полный отчет VirusTotal</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
 
-
-
-    
     <div class="mt-4">
         <a href="{% url 'dashboard:dashboard' %}" class="btn btn-secondary">Назад</a>
     </div>

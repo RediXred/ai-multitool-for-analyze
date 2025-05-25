@@ -1,7 +1,4 @@
 import pefile
-import requests
-
-
 
 def analyze_pe_file(filepath):
     try:
