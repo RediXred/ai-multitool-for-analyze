@@ -9,3 +9,4 @@ redis>=4.5
 django-redis==5.4.0
 openai>=0.27.0
 python-dotenv==1.0.1
+pefile>=2023.2.7
