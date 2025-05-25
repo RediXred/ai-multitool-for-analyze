@@ -15,7 +15,7 @@ def upload_file(request):
             uploaded_file.user = request.user
             uploaded_file.save()
             analyze_uploaded_file.delay(uploaded_file.id)
-            return redirect('dashboard')
+            return redirect('dashboard:dashboard')
     else:
         form = FileUploadForm()
     return render(request, 'analysis/upload.html', {'form': form})

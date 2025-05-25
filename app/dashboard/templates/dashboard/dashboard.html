@@ -3,7 +3,11 @@
 <h2>Файлы</h2>
 <ul>
   {% for file in files %}
-    <li>{{ file.filename }} — {{ file.uploaded_at }}</li>
+    <li>
+      {{ file.filename }} — {{ file.uploaded_at }}
+      <a href="{% url 'analyze-file' file.id %}" class="btn btn-sm btn-info">Анализировать</a>
+      <a href="{{ file.file.url }}" class="btn btn-sm btn-secondary" download>Скачать</a>
+    </li>
   {% empty %}
     <li>Нет загруженных файлов.</li>
   {% endfor %}
@@ -19,4 +23,4 @@
 </ul>
 -->
 
-<a href="{% url 'analysis:upload' %}">Загрузить файлы</a>
+<a href="{% url 'analysis:upload' %}" class="btn btn-primary">Загрузить файлы</a>
