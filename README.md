@@ -57,7 +57,7 @@ AI-Multitool-Analyse is a web application for analyzing files using artificial i
    VT_API_KEY=your-virustotal-api-key
 
    # Google Generative AI
-   GOOGLE_API_KEY=your-google-api-key
+   GEMENI_API_KEY=your-google-api-key
    ```
 
    Replace `your-secret-key`, `your-password`, `your-virustotal-api-key`, `your-openai-api-key`, `your-google-api-key` with actual values.
