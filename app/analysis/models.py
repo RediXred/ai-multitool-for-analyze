@@ -22,6 +22,8 @@ class UploadedFile(models.Model):
     result = models.JSONField(blank=True, null=True)
     vt_result = models.JSONField(blank=True, null=True)
     vt_status = models.CharField(max_length=20, default='not_started')
+    ai_status = models.CharField(max_length=20, default='not_started')
+    ai_result = models.JSONField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.user.username} - {self.file.name}"
