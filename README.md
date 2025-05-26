@@ -99,6 +99,10 @@ AI-Multitool-Analyse is a web application for analyzing files using artificial i
 - **Asynchronous Analysis**: Celery handles tasks (e.g., VirusTotal scans) in the background. Check status in the `UploadedFile` model (`vt_status`, `ai_status` fields).
 - **Logs**: View Django and Celery logs with `docker-compose logs django` and `docker-compose logs celery`.
 
+### Warnings
+
+For users from Russia you must use a VPN (for AI utils).
+
 ### Security
 
 - Set `DEBUG=False` in `.env` for production.
