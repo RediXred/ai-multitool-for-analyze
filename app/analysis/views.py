@@ -25,4 +25,4 @@ def upload_success(request, pk):
     return render(request, 'analysis/success.html', {'file': file})
 
 def home(request):
-    return HttpResponse("Multitool: домашняя страница.")
+    return render(request, 'analysis/home.html', {'user': request.user})
