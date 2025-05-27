@@ -49,11 +49,61 @@ def file_actions_keyboard(file_id):
     return InlineKeyboardMarkup([
         [
             InlineKeyboardButton("🗑 Удалить", callback_data=f"delete_{file_id}"),
-            InlineKeyboardButton("🔍 Обновить", callback_data=f"analyze_{file_id}")
+            InlineKeyboardButton("🔍 Обновить", callback_data=f"analyze_{file_id}"),
+            InlineKeyboardButton("🤖 AI-анализ", callback_data=f"ai_analyze_{file_id}"),
         ],
         [InlineKeyboardButton("📊 Подробный отчёт", url=f"{os.getenv('HOST')}/analyze/{file_id}/")],
         [InlineKeyboardButton("◀️ Назад", callback_data="back_to_menu")]
     ])
+
+import re
+
+def escape_markdown_v2(text: str) -> str:
+    escape_chars = r'\_*[]()~`>#+-=|{}.!'
+    return re.sub(r'([%s])' % re.escape(escape_chars), r'\\\1', text)
+
+async def ai_analysis_handler(update: Update, context: ContextTypes.DEFAULT_TYPE, file_id: int):
+    query = update.callback_query
+    user = context.user_data["django_user"]
+    
+    try:
+        # Получаем файл из БД асинхронно
+        file = await sync_to_async(UploadedFile.objects.get)(id=file_id)
+        
+        # Проверяем права доступа асинхронно
+        is_owner = await sync_to_async(lambda: file.user == user)()
+        if not is_owner:
+            await query.answer("🚫 Нет доступа к этому файлу!")
+            return FILE_ACTIONS
+        
+        # Проверяем наличие результатов AI асинхронно
+        ai_result = await sync_to_async(lambda: file.ai_result)()
+        if not ai_result:
+            await query.answer("🤖 AI-анализ ещё не завершён!")
+            return FILE_ACTIONS
+        
+        # Экранируем специальные символы в ai_result
+        escaped_ai_result = escape_markdown_v2(ai_result) if isinstance(ai_result, str) else str(ai_result)
+        
+        # Формируем текст ответа
+        response_text = "🤖 *Результаты AI-анализа:*\n\n" + escaped_ai_result
+        
+        # Обновляем сообщение асинхронно
+        await query.edit_message_text(
+            response_text,
+            parse_mode=None,
+            reply_markup=file_actions_keyboard(file_id)
+        )
+        
+    except UploadedFile.DoesNotExist:
+        await query.answer("❌ Файл не найден!")
+        logger.error(f"File {file_id} not found")
+    except Exception as e:
+        logger.error(f"AI analysis error: {str(e)}", exc_info=True)
+        await query.answer("⚠️ Ошибка при получении анализа!")
+    
+    return FILE_ACTIONS
+
 
 def setup_bot():
     """Инициализация и запуск бота в отдельном потоке"""
@@ -315,6 +365,10 @@ async def handle_file_actions(update: Update, context: ContextTypes.DEFAULT_TYPE
     elif query.data.startswith("analyze_"):
         file_id = query.data.split("_")[1]
         return await analyze_file_handler(update, context, file_id)
+    
+    elif query.data.startswith("ai_analyze_"):
+        file_id = query.data.split("_")[2]
+        return await ai_analysis_handler(update, context, file_id)
     
     elif query.data == "back_to_list":
         return await handle_main_menu(update, context)
