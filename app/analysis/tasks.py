@@ -3,6 +3,7 @@ from .models import UploadedFile
 import hashlib
 import os
 import logging
+from baseanalyze.views import get_analysis_context
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +31,7 @@ def analyze_uploaded_file(file_id):
         obj.analyzed = True
         obj.save()
         logger.info(f"Successfully analyzed: {path}")
+        return file_id
     except Exception as e:
         logger.exception(f"Failed to analyze file {path}: {e}")
 
@@ -39,3 +41,8 @@ def hash_file(path):
         for chunk in iter(lambda: f.read(4096), b""):
             hasher.update(chunk)
     return hasher.hexdigest()
+
+@shared_task
+def analyze_file_task(file_id):
+    file_obj = UploadedFile.objects.get(id=file_id)
+    context = get_analysis_context(file_obj)

@@ -23,4 +23,5 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('dashboard/', include('dashboard.urls')),
     path('analyze/', include('baseanalyze.urls')),
+    path('telegram/', include('telegram_bot.urls')),
 ]

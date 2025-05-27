@@ -10,10 +10,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-@login_required
-def analyze_file(request, file_id):
-    file_obj = get_object_or_404(UploadedFile, id=file_id, user=request.user)
-
+def get_analysis_context(file_obj):
     # baseinfo
     file_info = get_file_info(file_obj.file.path)
     file_info['hashes'] = calculate_hashes(file_obj.file.path)
@@ -23,9 +20,9 @@ def analyze_file(request, file_id):
 
     # peinfo
     pe_info = analyze_pe_file(file_obj.file.path)
-    if 'imports' not in pe_info.keys():
+    if 'imports' not in pe_info:
         pe_info['imports'] = []
-    if 'exports' not in pe_info.keys():
+    if 'exports' not in pe_info:
         pe_info['exports'] = []
 
     context = {
@@ -35,18 +32,19 @@ def analyze_file(request, file_id):
         'pe_info': pe_info,
     }
 
+    if file_obj.vt_status not in ['pending', 'completed']:
+        analyze_file_vt.delay(file_obj.file.path, file_obj.id, strings, pe_info)
+        file_obj.vt_status = 'pending'
+        file_obj.save()
+        logger.info(f"Started async VT analysis for file ID {file_obj.id}")
+
     # vt_check
     if file_obj.vt_status == 'completed' and file_obj.vt_result:
         context['vt_info'] = file_obj.vt_result
     elif file_obj.vt_status == 'failed':
         context['vt_info'] = file_obj.vt_result or {'error': 'Analysis failed'}
     else:
-        if file_obj.vt_status != 'pending':
-            analyze_file_vt.delay(file_obj.file.path, file_id, strings, pe_info)
-            file_obj.vt_status = 'pending'
-            file_obj.save()
         context['vt_info'] = {'error': 'Analysis in progress, please check back later.'}
-        logger.info(f"Started async VT analysis for file ID {file_id}")
 
     # ai_check
     if file_obj.ai_status == 'completed' and file_obj.ai_result:
@@ -56,4 +54,12 @@ def analyze_file(request, file_id):
     else:
         context['ai_info'] = {'error': 'AI analysis in progress. Please check back later.'}
 
+    return context
+
+
+@login_required
+def analyze_file(request, file_id):
+    file_obj = get_object_or_404(UploadedFile, id=file_id, user=request.user)
+
+    context = get_analysis_context(file_obj)
     return render(request, 'baseanalyze/analyze.html', context)
