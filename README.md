@@ -18,6 +18,7 @@ AI-Multitool-Analyse is a web application for analyzing files using artificial i
 - **Containerization**: Docker, Docker Compose
 - **AI Analysis**:
   - `google-genai` (Google Generative AI integration)
+- **TelegramAPI**: Integration with Telegram bot
 
 ## Setup Instructions
 
@@ -38,6 +39,8 @@ AI-Multitool-Analyse is a web application for analyzing files using artificial i
 2. **Create a `.env` File** in the project root with the following variables (example):
 
    ```env
+   HOST=https://yourhost.com
+   
    # Django
    DJANGO_SECRET_KEY=your-secret-key
    DEBUG=True
@@ -58,9 +61,13 @@ AI-Multitool-Analyse is a web application for analyzing files using artificial i
 
    # Google Generative AI
    GEMENI_API_KEY=your-google-api-key
+
+   #
+   TELEGRAM_BOT_TOKEN=your-bot-token
+   TELEGRAM_WEBHOOK_URL={HOST}/telegram/webhook/
    ```
 
-   Replace `your-secret-key`, `your-password`, `your-virustotal-api-key`, `your-openai-api-key`, `your-google-api-key` with actual values.
+   Replace it with actual values.
 
 3. **Run Docker Compose**:
 
@@ -98,6 +105,7 @@ AI-Multitool-Analyse is a web application for analyzing files using artificial i
 - **File Upload**: Navigate to `/analysis/upload/`, log in, and upload a file. Analysis results (hashes, strings, PE data, VirusTotal, AI analysis) will appear on the dashboard (`/dashboard/`).
 - **Asynchronous Analysis**: Celery handles tasks (e.g., VirusTotal scans) in the background. Check status in the `UploadedFile` model (`vt_status`, `ai_status` fields).
 - **Logs**: View Django and Celery logs with `docker-compose logs django` and `docker-compose logs celery`.
+- **Telegram**: Send "/start" to your @TelegramBot to access the functionality of the application using the bot.
 
 ### Warnings
 
